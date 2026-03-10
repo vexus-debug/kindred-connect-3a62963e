@@ -194,9 +194,8 @@ function PatternCard({ pattern: dp }: { pattern: DetectedPattern }) {
   const p = dp.pattern;
   const isBull = p.type === 'bullish';
   const isBear = p.type === 'bearish';
-  const timeAgo = getTimeAgo(dp.detectedAt);
   const signalLabel = isBull ? 'Buy signal' : isBear ? 'Sell signal' : 'Neutral';
-
+  const formedTime = formatFormedTime(dp.formedAt, dp.timeframe);
   const tradingTip = getTradingTip(p.name, p.type, dp.price);
 
   return (
@@ -275,7 +274,7 @@ function PatternCard({ pattern: dp }: { pattern: DetectedPattern }) {
             </span>
             <span className="flex items-center gap-0.5">
               <Clock className="h-2.5 w-2.5" />
-              {timeAgo}
+              {formedTime}
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -343,10 +342,10 @@ function getTradingTip(name: string, type: string, price: number): string | null
   return tips[name] || `${type === 'bullish' ? 'Bullish' : 'Bearish'} pattern detected. Look for ${direction} setups with proper risk management.`;
 }
 
-function getTimeAgo(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000);
-  if (diff < 60) return `${diff}s ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
+function formatFormedTime(ts: number, timeframe: string): string {
+  const d = new Date(ts);
+  if (timeframe === 'D' || timeframe === 'W') {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 }

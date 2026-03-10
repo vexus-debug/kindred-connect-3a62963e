@@ -18,6 +18,7 @@ export interface DetectedPattern {
   pattern: CandlestickPattern | ChartPattern | MarketStructureEvent;
   price: number;
   detectedAt: number;
+  formedAt: number; // actual candle timestamp when the pattern formed
   category: 'candlestick' | 'chart' | 'structure';
 }
 
@@ -87,25 +88,28 @@ export function usePatternScanner() {
 
               const cPatterns = detectCandlestickPatterns(candles);
               for (const p of cPatterns) {
+                const formedAt = candles[p.candleIndex]?.time ?? now;
                 newCandlestick.push({
                   id: `cs-${symbol}-${tf}-${p.name}-${now}`,
-                  symbol: sym, timeframe: tf, pattern: p, price, detectedAt: now, category: 'candlestick',
+                  symbol: sym, timeframe: tf, pattern: p, price, detectedAt: now, formedAt, category: 'candlestick',
                 });
               }
 
               const chPatterns = detectChartPatterns(candles);
               for (const p of chPatterns) {
+                const formedAt = candles[p.endIndex]?.time ?? now;
                 newChart.push({
                   id: `ch-${symbol}-${tf}-${p.name}-${now}`,
-                  symbol: sym, timeframe: tf, pattern: p, price, detectedAt: now, category: 'chart',
+                  symbol: sym, timeframe: tf, pattern: p, price, detectedAt: now, formedAt, category: 'chart',
                 });
               }
 
               const msEvents = detectMarketStructure(candles);
               for (const p of msEvents) {
+                const formedAt = candles[p.candleIndex]?.time ?? now;
                 newStructure.push({
                   id: `ms-${symbol}-${tf}-${p.name}-${now}`,
-                  symbol: sym, timeframe: tf, pattern: p, price, detectedAt: now, category: 'structure',
+                  symbol: sym, timeframe: tf, pattern: p, price, detectedAt: now, formedAt, category: 'structure',
                 });
               }
             } catch { /* skip */ }
