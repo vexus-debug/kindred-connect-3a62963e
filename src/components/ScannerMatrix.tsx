@@ -4,7 +4,7 @@ import { ALL_TIMEFRAMES, TIMEFRAME_LABELS } from '@/types/scanner';
 import type { ConfirmedTrend, IndicatorDetail } from '@/lib/indicators';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Search, Star, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Shield, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Search, Star, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Shield, ShieldCheck, ShieldAlert, Target, Gauge } from 'lucide-react';
 
 interface ScannerMatrixProps {
   assets: AssetTrend[];
@@ -265,6 +265,64 @@ function TrendCard({
               </div>
             ))}
           </div>
+
+          {/* Probability Rating */}
+          <div className="flex items-center gap-2 py-1.5 border-t border-border/30">
+            <Gauge className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-[10px] text-muted-foreground font-medium">Probability</span>
+            <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${sig.probability ?? 0}%`,
+                  backgroundColor: (sig.probability ?? 0) >= 75 ? 'hsl(var(--primary))' :
+                    (sig.probability ?? 0) >= 50 ? 'hsl(var(--accent))' : 'hsl(var(--muted-foreground))',
+                }}
+              />
+            </div>
+            <span className={`text-[11px] font-bold tabular-nums ${
+              (sig.probability ?? 0) >= 75 ? 'text-primary' :
+              (sig.probability ?? 0) >= 50 ? 'text-accent' : 'text-muted-foreground'
+            }`}>
+              {sig.probability ?? 0}%
+            </span>
+          </div>
+
+          {/* Support & Resistance */}
+          {sig.supportResistance && (
+            <div className="py-1.5 border-t border-border/30 space-y-1">
+              <div className="flex items-center gap-1.5">
+                <Target className="h-3 w-3 text-muted-foreground" />
+                <span className="text-[9px] uppercase text-muted-foreground font-medium">
+                  Support & Resistance ({TIMEFRAME_LABELS[tf]})
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded bg-primary/10 px-2 py-1.5">
+                  <div className="text-[8px] uppercase text-muted-foreground">Support</div>
+                  <div className="text-[11px] font-bold text-primary tabular-nums">
+                    ${sig.supportResistance.nearestSupport < 1
+                      ? sig.supportResistance.nearestSupport.toPrecision(4)
+                      : sig.supportResistance.nearestSupport.toFixed(2)}
+                  </div>
+                  <div className="text-[9px] text-muted-foreground tabular-nums">
+                    -{sig.supportResistance.supportDistance.toFixed(2)}% away
+                  </div>
+                </div>
+                <div className="rounded bg-destructive/10 px-2 py-1.5">
+                  <div className="text-[8px] uppercase text-muted-foreground">Resistance</div>
+                  <div className="text-[11px] font-bold text-destructive tabular-nums">
+                    ${sig.supportResistance.nearestResistance < 1
+                      ? sig.supportResistance.nearestResistance.toPrecision(4)
+                      : sig.supportResistance.nearestResistance.toFixed(2)}
+                  </div>
+                  <div className="text-[9px] text-muted-foreground tabular-nums">
+                    +{sig.supportResistance.resistanceDistance.toFixed(2)}% away
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Quick stats */}
           <div className="flex gap-3 pt-1 border-t border-border/30 text-[9px] text-muted-foreground">
