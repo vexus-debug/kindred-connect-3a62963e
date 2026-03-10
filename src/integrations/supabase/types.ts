@@ -14,7 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      scan_cache: {
+        Row: {
+          data: Json
+          id: string
+          scanned_at: string
+        }
+        Insert: {
+          data?: Json
+          id: string
+          scanned_at?: string
+        }
+        Update: {
+          data?: Json
+          id?: string
+          scanned_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
