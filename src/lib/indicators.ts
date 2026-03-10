@@ -106,6 +106,69 @@ export function calculateVolumeRatio(candles: Candle[], lookback: number = 20): 
   return avg === 0 ? 1 : recent / avg;
 }
 
+/** Find nearest support and resistance from swing highs/lows and EMAs */
+function findSupportResistance(candles: Candle[], emas: { e9: number; e21: number; e50: number; e200: number }): SupportResistance {
+  const price = candles[candles.length - 1].close;
+  const lookback = Math.min(candles.length, 100);
+  const recent = candles.slice(-lookback);
+
+  // Collect swing highs and lows
+  const levels: number[] = [];
+  for (let i = 2; i < recent.length - 2; i++) {
+    if (recent[i].high > recent[i - 1].high && recent[i].high > recent[i - 2].high &&
+        recent[i].high > recent[i + 1].high && recent[i].high > recent[i + 2].high) {
+      levels.push(recent[i].high);
+    }
+    if (recent[i].low < recent[i - 1].low && recent[i].low < recent[i - 2].low &&
+        recent[i].low < recent[i + 1].low && recent[i].low < recent[i + 2].low) {
+      levels.push(recent[i].low);
+    }
+  }
+
+  // Add EMA levels as dynamic S/R
+  levels.push(emas.e9, emas.e21, emas.e50, emas.e200);
+
+  const supports = levels.filter(l => l < price).sort((a, b) => b - a);
+  const resistances = levels.filter(l => l > price).sort((a, b) => a - b);
+
+  const nearestSupport = supports[0] ?? price * 0.95;
+  const nearestResistance = resistances[0] ?? price * 1.05;
+
+  return {
+    nearestSupport,
+    nearestResistance,
+    supportDistance: ((price - nearestSupport) / price) * 100,
+    resistanceDistance: ((nearestResistance - price) / price) * 100,
+  };
+}
+
+/** Calculate trend probability (0-100) based on weighted indicator confluence */
+function calculateProbability(
+  bullVotes: number, bearVotes: number, totalChecks: number,
+  adx: number, volumeRatio: number, rsi: number, direction: 'bull' | 'bear'
+): number {
+  // Base: confirmation ratio
+  const maxVotes = Math.max(bullVotes, bearVotes);
+  let prob = (maxVotes / totalChecks) * 60; // up to 60%
+
+  // ADX strength bonus (up to 15%)
+  prob += Math.min(adx / 60, 1) * 15;
+
+  // Volume confirmation bonus (up to 10%)
+  if (volumeRatio > 1.3) prob += Math.min((volumeRatio - 1) / 2, 1) * 10;
+
+  // RSI alignment bonus (up to 10%)
+  if (direction === 'bull' && rsi > 55 && rsi < 80) prob += 10;
+  else if (direction === 'bear' && rsi < 45 && rsi > 20) prob += 10;
+  else if (rsi >= 80 || rsi <= 20) prob -= 5; // overbought/oversold = less reliable
+
+  // Opposing votes penalty
+  const opposingRatio = Math.min(bullVotes, bearVotes) / totalChecks;
+  prob -= opposingRatio * 15;
+
+  return Math.max(10, Math.min(95, Math.round(prob)));
+}
+
 /** Check for higher highs & higher lows (bull) or lower highs & lower lows (bear) */
 function analyzePriceStructure(candles: Candle[], lookback = 20): 'bull' | 'bear' | 'neutral' {
   const recent = candles.slice(-lookback);
