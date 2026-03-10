@@ -331,6 +331,9 @@ export function analyzeTrend(
 
   const score = direction === 'bull' ? Math.round(bullVotes * 15) : -Math.round(bearVotes * 15);
 
+  const probability = calculateProbability(bullVotes, bearVotes, totalChecks, adx, volumeRatio, rsi, direction);
+  const supportResistance = findSupportResistance(candles, { e9, e21, e50, e200 });
+
   return {
     direction, strength,
     ema9: e9, ema21: e21, ema50: e50, ema200: e200,
@@ -339,5 +342,6 @@ export function analyzeTrend(
     indicators,
     rsi, macdHistogram: macd.histogram,
     priceStructure, plusDI, minusDI,
+    probability, supportResistance,
   };
 }
