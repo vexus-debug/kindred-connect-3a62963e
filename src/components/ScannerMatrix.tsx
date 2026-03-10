@@ -4,7 +4,7 @@ import { ALL_TIMEFRAMES, TIMEFRAME_LABELS } from '@/types/scanner';
 import type { ConfirmedTrend, IndicatorDetail } from '@/lib/indicators';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Search, Star, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Shield, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Search, Star, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Shield, ShieldCheck, ShieldAlert, Target, Gauge } from 'lucide-react';
 
 interface ScannerMatrixProps {
   assets: AssetTrend[];
