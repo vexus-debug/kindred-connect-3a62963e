@@ -150,21 +150,28 @@ export function usePatternScanner(trendAssets: AssetTrend[] = []) {
               const candles = await fetchKlines(symbol, tf, category);
               if (candles.length < 20) { progress++; continue; }
 
+              // Exclude last (incomplete) candle for pattern detection
+              const closedCandles = candles.slice(0, -1);
+              if (closedCandles.length < 20) { progress++; continue; }
+
               const now = Date.now();
               const sym = symbol.replace('USDT', '');
 
-              const cPatterns = detectCandlestickPatterns(candles);
+              const cPatterns = detectCandlestickPatterns(closedCandles, false); // already sliced
               for (const p of cPatterns) {
-                const candleTime = (p.candleIndex >= 0 && p.candleIndex < candles.length) ? candles[p.candleIndex].time : 0;
-                const formedAt = candleTime > 0 ? candleTime : (candles[candles.length - 1]?.time ?? now);
+                const candleTime = (p.candleIndex >= 0 && p.candleIndex < closedCandles.length) ? closedCandles[p.candleIndex].time : 0;
+                const formedAt = candleTime > 0 ? candleTime : (closedCandles[closedCandles.length - 1]?.time ?? now);
                 const { significance, aligned } = adjustSignificance(p.significance, p.type, sym, tf, currentTrends);
+                // High-probability filter: only keep high significance, or medium+trend-aligned
+                if (significance === 'low') continue;
+                if (significance === 'medium' && !aligned && p.type === 'neutral') continue;
                 newCandlestick.push({ id: `cs-${symbol}-${tf}-${p.name}-${now}`, symbol: sym, timeframe: tf, pattern: { ...p, significance }, price, detectedAt: now, formedAt, category: 'candlestick', trendAligned: aligned });
               }
 
-              const chPatterns = detectChartPatterns(candles);
+              const chPatterns = detectChartPatterns(closedCandles);
               for (const p of chPatterns) {
-                const candleTime = (p.endIndex >= 0 && p.endIndex < candles.length) ? candles[p.endIndex].time : 0;
-                const formedAt = candleTime > 0 ? candleTime : (candles[candles.length - 1]?.time ?? now);
+                const candleTime = (p.endIndex >= 0 && p.endIndex < closedCandles.length) ? closedCandles[p.endIndex].time : 0;
+                const formedAt = candleTime > 0 ? candleTime : (closedCandles[closedCandles.length - 1]?.time ?? now);
                 const { significance, aligned } = adjustSignificance(p.significance, p.type, sym, tf, currentTrends);
                 newChart.push({ id: `ch-${symbol}-${tf}-${p.name}-${now}`, symbol: sym, timeframe: tf, pattern: { ...p, significance }, price, detectedAt: now, formedAt, category: 'chart', trendAligned: aligned });
               }
