@@ -15,38 +15,50 @@ interface Zone {
   timeframe: Timeframe;
 }
 
-/** Detect supply/demand zones from asset signals */
+/** Detect supply/demand zones from asset signals using EMAs and price action */
 function detectZones(asset: AssetTrend): Zone[] {
   const zones: Zone[] = [];
+  const price = asset.price;
 
   for (const tf of ALL_TIMEFRAMES) {
     const sig = asset.signals[tf] as ConfirmedTrend | undefined;
-    if (!sig?.supportResistance) continue;
+    if (!sig) continue;
 
-    const sr = sig.supportResistance;
-    const price = asset.price;
-    const atrEstimate = price * 0.02; // rough ATR estimate
+    const { ema9, ema21, ema50, ema200, atr } = sig as any;
+    if (!ema9 || !ema21) continue;
 
-    // Demand zone near support
-    if (sr.supportDistance < 5) {
-      zones.push({
-        type: 'demand',
-        high: sr.nearestSupport,
-        low: sr.nearestSupport - atrEstimate,
-        strength: sr.supportDistance < 1 ? 3 : sr.supportDistance < 3 ? 2 : 1,
-        timeframe: tf,
-      });
-    }
+    const atrVal = atr || price * 0.015;
 
-    // Supply zone near resistance
-    if (sr.resistanceDistance < 5) {
-      zones.push({
-        type: 'supply',
-        high: sr.nearestResistance + atrEstimate,
-        low: sr.nearestResistance,
-        strength: sr.resistanceDistance < 1 ? 3 : sr.resistanceDistance < 3 ? 2 : 1,
-        timeframe: tf,
-      });
+    // Demand zones: EMAs below price acting as support
+    const emas = [
+      { val: ema200, weight: 3 },
+      { val: ema50, weight: 2 },
+      { val: ema21, weight: 1 },
+    ];
+
+    for (const { val, weight } of emas) {
+      if (!val) continue;
+      const dist = ((price - val) / price) * 100;
+      // EMA is below price and within 5% — potential demand zone
+      if (dist > 0 && dist < 5) {
+        zones.push({
+          type: 'demand',
+          high: val + atrVal * 0.3,
+          low: val - atrVal * 0.3,
+          strength: Math.min(3, weight),
+          timeframe: tf,
+        });
+      }
+      // EMA is above price and within 5% — potential supply zone
+      if (dist < 0 && dist > -5) {
+        zones.push({
+          type: 'supply',
+          high: val + atrVal * 0.3,
+          low: val - atrVal * 0.3,
+          strength: Math.min(3, weight),
+          timeframe: tf,
+        });
+      }
     }
   }
 
