@@ -428,7 +428,21 @@ function TrendCard({
           {/* Trend Duration & Reversal Analysis */}
           {(() => {
             const td = sig.trendDuration;
-            if (!td) return null;
+            if (!td) {
+              return (
+                <div className="py-1.5 border-t border-border/30">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-[9px] uppercase text-muted-foreground font-medium">
+                      Trend Duration ({TIMEFRAME_LABELS[tf]})
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-muted-foreground mt-1">
+                    Run a manual scan (↻) to generate trend duration & reversal data
+                  </div>
+                </div>
+              );
+            }
             const isBullTrend = sig.direction === 'bull';
             const fmt = (v: number) => v < 1 ? v.toPrecision(4) : v.toFixed(2);
             const riskColor = td.exhaustionRisk === 'high' ? 'text-destructive' : td.exhaustionRisk === 'medium' ? 'text-accent' : 'text-primary';
