@@ -53,8 +53,10 @@ const App = () => (
                   <Route path="/volatility" element={<VolatilityRanking />} />
                   <Route path="/symbol/:symbol" element={<SymbolDetail />} />
                   <Route path="/funding-rates" element={<FundingRates />} />
+                  <Route path="/funding" element={<FundingRates />} />
                   <Route path="/correlation" element={<CorrelationMatrix />} />
                   <Route path="/sector-rotation" element={<SectorRotation />} />
+                  <Route path="/sectors" element={<SectorRotation />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
