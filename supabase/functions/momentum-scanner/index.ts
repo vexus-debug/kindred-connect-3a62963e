@@ -341,11 +341,42 @@ function detectMomentum(candles: Candle[], timeframe: string): Omit<MomentumSign
   if (signalCount >= 5) score += 10;
   if (signalCount >= 7) score += 15;
 
-  // Filter: need at least 3 signals and score >= 30
-  if (signalCount < 3 || score < 30) return null;
+  // ─── HARDCORE FILTERING: Only life-or-death conviction signals ───
 
-  // Must have at least one of the "core" signals
-  if (!macdCross && !volumeSpike && !adxSurge && !squeezeFire) return null;
+  // Must have volume confirmation — no volume = no real move
+  if (!volumeSpike) return null;
+
+  // Volume must be at least 2.5x average, not just 1.8x
+  if (volumeRatio < 2.5) return null;
+
+  // Must have at least 5 confirming signals and high score
+  if (signalCount < 5 || score < 50) return null;
+
+  // Must have MACD confirmation (trend engine)
+  if (!macdCross) return null;
+
+  // Must have ADX showing real trend strength ≥25 (not choppy garbage)
+  if (!adxSurge || curADX < 25) return null;
+
+  // EMA alignment is mandatory — price structure must confirm
+  if (!emaCrossover) return null;
+
+  // Price acceleration must confirm — move is gaining steam, not fading
+  if (!priceAcceleration) return null;
+
+  // RSI must not be overextended (likely to reverse soon)
+  if (direction === 'bull' && curRSI > 78) return null;
+  if (direction === 'bear' && curRSI < 22) return null;
+
+  // Stochastic must not be at extremes (overbought/oversold = late entry)
+  if (direction === 'bull' && curStochK > 85) return null;
+  if (direction === 'bear' && curStochK < 15) return null;
+
+  // OBV must confirm — smart money has to be in the move
+  const obvTrending = direction === 'bull'
+    ? obv[last] > obv[last - 5]
+    : obv[last] < obv[last - 5];
+  if (!obvTrending) return null;
 
   return {
     timeframe,
