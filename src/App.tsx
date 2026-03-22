@@ -25,6 +25,7 @@ import CorrelationMatrix from "./pages/CorrelationMatrix.tsx";
 import SectorRotation from "./pages/SectorRotation.tsx";
 import IndicatorScanner from "./pages/IndicatorScanner.tsx";
 import ReversalScanner from "./pages/ReversalScanner.tsx";
+import MomentumScanner from "./pages/MomentumScanner.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ const App = () => (
                   <Route path="/sectors" element={<SectorRotation />} />
                   <Route path="/indicator-scanner" element={<IndicatorScanner />} />
                   <Route path="/reversals" element={<ReversalScanner />} />
+                  <Route path="/momentum" element={<MomentumScanner />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
