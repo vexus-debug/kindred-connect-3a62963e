@@ -17,7 +17,7 @@ const NAV_GROUPS = [
       { to: '/', label: 'Trend Scanner', icon: BarChart3 },
       { to: '/reversals', label: 'Reversals', icon: RotateCcw },
       { to: '/indicator-scanner', label: 'Indicators', icon: Activity },
-      { to: '/momentum', label: 'Momentum', icon: Zap },
+      { to: '/momentum', label: 'Momentum', icon: Rocket },
       { to: '/confluence', label: 'Confluence', icon: Zap },
       { to: '/range-scanner', label: 'Range', icon: Layers },
     ],
