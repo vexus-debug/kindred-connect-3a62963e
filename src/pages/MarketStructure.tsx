@@ -336,6 +336,10 @@ function SmcMetaOverview({ meta, price }: { meta: SmcMeta; price: number }) {
         {meta.nearKeyLevel && (
           <StatItem icon={<Crosshair className="h-2.5 w-2.5" />} label="Key Lvl" value={meta.keyLevelName || 'Yes'} valueClass="text-accent" />
         )}
+        {meta.chochFailures != null && meta.chochFailures > 0 && (
+          <StatItem icon={<Shield className="h-2.5 w-2.5" />} label="CHoCH Fails" value={`${meta.chochFailures}`}
+            valueClass={meta.chochFailures >= 3 ? 'text-destructive' : meta.chochFailures >= 2 ? 'text-accent' : 'text-foreground'} />
+        )}
       </div>
 
       {/* Suggested levels */}
