@@ -17,8 +17,8 @@ import type {
 import { DEFAULT_LEADER_LAG_SETTINGS } from '@/types/leader-lag';
 import type { Candle } from '@/types/scanner';
 
-const BATCH_SIZE = 8;
-const TOP_COUNT = 80;
+const BATCH_SIZE = 20;
+const TOP_COUNT = 40;
 
 function computeReturns(candles: Candle[]): number[] {
   const returns: number[] = [];
