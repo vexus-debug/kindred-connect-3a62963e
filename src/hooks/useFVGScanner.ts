@@ -4,7 +4,7 @@ import { detectPureFVGs, type FVGScanResult } from '@/lib/fvg-scanner';
 import type { Timeframe } from '@/types/scanner';
 
 const FVG_TIMEFRAMES: Timeframe[] = ['60', '240', 'D'];
-const TOP_SYMBOLS = 50;
+const TOP_SYMBOLS = 500; // scan all USDT pairs
 const BATCH_SIZE = 5;
 const SCAN_INTERVAL = 60 * 60 * 1000; // 1 hour
 
