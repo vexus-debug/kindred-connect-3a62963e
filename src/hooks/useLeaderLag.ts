@@ -100,7 +100,8 @@ export function useLeaderLag() {
       setProgress({ current: 0, total: symbols.length });
 
       // 2. Fetch klines for all symbols
-      const interval = mapInterval(settings.timeframe);
+      // Always fetch 1m candles; we compute change over N periods
+      const interval = '1' as const;
       const allCandles = new Map<string, Candle[]>();
 
       for (let i = 0; i < symbols.length; i += BATCH_SIZE) {
