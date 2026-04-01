@@ -27,6 +27,7 @@ import IndicatorScanner from "./pages/IndicatorScanner.tsx";
 import ReversalScanner from "./pages/ReversalScanner.tsx";
 import MomentumScanner from "./pages/MomentumScanner.tsx";
 import BreakoutScanner from "./pages/BreakoutScanner.tsx";
+import FVGScanner from "./pages/FVGScanner.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
