@@ -45,7 +45,8 @@ export function detectPureFVGs(candles: Candle[], timeframe: Timeframe): PureFVG
     atrSum += candles[i].high - candles[i].low;
   }
   const atr = atrSum / Math.min(candles.length - 1, 14);
-  const minGap = atr * 0.15; // minimum gap size to filter noise
+  const minGap = atr * 0.5; // minimum gap size — only large imbalances
+  const minImpulseBody = atr * 1.5; // impulse candle must be at least 1.5x ATR
 
   // Average volume for ratio
   const recentVols = candles.slice(-20).map(c => c.volume);
@@ -60,7 +61,7 @@ export function detectPureFVGs(candles: Candle[], timeframe: Timeframe): PureFVG
     const impulseBody = Math.abs(c1.close - c1.open);
 
     // Bullish FVG: gap between c0.high and c2.low
-    if (c2.low > c0.high && (c2.low - c0.high) > minGap) {
+    if (c2.low > c0.high && (c2.low - c0.high) > minGap && impulseBody > minImpulseBody) {
       const gapHigh = c2.low;
       const gapLow = c0.high;
       const gapSize = gapHigh - gapLow;
@@ -92,7 +93,7 @@ export function detectPureFVGs(candles: Candle[], timeframe: Timeframe): PureFVG
     }
 
     // Bearish FVG: gap between c2.high and c0.low
-    if (c2.high < c0.low && (c0.low - c2.high) > minGap) {
+    if (c2.high < c0.low && (c0.low - c2.high) > minGap && impulseBody > minImpulseBody) {
       const gapHigh = c0.low;
       const gapLow = c2.high;
       const gapSize = gapHigh - gapLow;
